@@ -1,7 +1,7 @@
 import streamlit as st
 from pathlib import Path
 
-from src.database import init_db, seed_admin
+from database import init_db, seed_admin
 from src.auth import login_view, logout
 from src.interns import admin_interns_view
 from src.tasks import admin_tasks_view, intern_tasks_view
