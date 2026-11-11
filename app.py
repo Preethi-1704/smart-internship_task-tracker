@@ -5,10 +5,10 @@ import streamlit as st
 
 # PROJECT ROOT PATH
 ROOT_DIR = Path(__file__).resolve().parent.parent
+SRC_DIR = Path(__file__).resolve().parent
 
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
-
 
 # IMPORT MODULES
 from src.database import init_db, seed_admin
@@ -22,7 +22,6 @@ from src.announcements import (
     intern_announcements_view
 )
 
-
 # PAGE CONFIGURATION
 st.set_page_config(
     page_title="Smart Internship Task Tracker",
@@ -30,61 +29,59 @@ st.set_page_config(
     layout="wide"
 )
 
-
 # COMPANY LOGO
 st.sidebar.title("DefineInfoTech Pvt. Ltd.")
 
-logo_path = Path(__file__).resolve().parent / "company_logo.jpeg"
+logo_path = SRC_DIR / "company_logo.jpeg"
 
-if logo_path.is_file():
-    st.sidebar.image(
-        str(logo_path),
-        width=180
-    )
-else:
-    st.sidebar.error("Company logo not found!")
-    st.sidebar.write("Expected location:")
-    st.sidebar.write(str(logo_path))
+try:
+    if logo_path.is_file():
+        from PIL import Image
+
+        company_logo = Image.open(logo_path)
+
+        st.sidebar.image(
+            company_logo,
+            caption="DefineInfoTech Pvt. Ltd.",
+            width=180
+        )
+    else:
+        st.sidebar.error("Company logo not found!")
+        st.sidebar.write("Expected file location:")
+        st.sidebar.code(str(logo_path))
+
+except Exception as e:
+    st.sidebar.error("Company logo loading error:")
+    st.sidebar.exception(e)
 
 st.sidebar.divider()
-
 
 # DATABASE INITIALIZATION
 init_db()
 seed_admin()
 
-
 # SESSION STATE
 if "user" not in st.session_state:
     st.session_state.user = None
-
 
 # LOGIN PAGE
 if st.session_state.user is None:
     login_view()
     st.stop()
 
-
 # CURRENT USER
 user = st.session_state.user
 role = user.get("role", "")
 
-
 # SIDEBAR USER DETAILS
 st.sidebar.subheader("Smart Internship Task Tracker")
-
-st.sidebar.write(
-    f"Welcome, {user.get('name', 'User')}"
-)
-
+st.sidebar.write(f"Welcome, {user.get('name', 'User')}")
 st.sidebar.divider()
-
 
 # LOGOUT
 if st.sidebar.button("Logout"):
     logout()
     st.rerun()
-
 
 # ADMIN DASHBOARD
 if role == "admin":
@@ -115,7 +112,6 @@ if role == "admin":
     elif menu == "Announcements":
         admin_announcements_view()
 
-
 # INTERN DASHBOARD
 elif role == "intern":
 
@@ -137,9 +133,6 @@ elif role == "intern":
     elif menu == "Announcements":
         intern_announcements_view()
 
-
 # INVALID ROLE
 else:
-    st.error(
-        "Invalid user role. Please contact admin."
-    )
+    st.error("Invalid user role. Please contact admin.")
