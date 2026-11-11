@@ -1,130 +1,145 @@
-import streamlit as st
-from pathlib import Path
 import sys
+from pathlib import Path
 
-# Root Directory
+import streamlit as st
+
+# PROJECT ROOT PATH
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-# Import Modules
-from database import init_db, seed_admin
-from auth import login_view, logout
-from interns import admin_interns_view
-from tasks import admin_tasks_view, intern_tasks_view
-from dashboard import admin_dashboard_view, intern_dashboard_view
-from reports import reports_view
-from announcements import (
+
+# IMPORT MODULES
+from src.database import init_db, seed_admin
+from src.auth import login_view, logout
+from src.interns import admin_interns_view
+from src.tasks import admin_tasks_view, intern_tasks_view
+from src.dashboard import admin_dashboard_view, intern_dashboard_view
+from src.reports import reports_view
+from src.announcements import (
     admin_announcements_view,
     intern_announcements_view
 )
 
-# Page Configuration
+
+# PAGE CONFIGURATION
 st.set_page_config(
-    page_title="Internship Task Tracker",
+    page_title="Smart Internship Task Tracker",
     page_icon="📌",
     layout="wide"
 )
 
-# Company Logo Path
-logo_path = ROOT_DIR / "assets" / "company_logo.jpeg"
 
-# Initialize Database
+# COMPANY LOGO
+st.sidebar.title("DefineInfoTech Pvt. Ltd.")
+
+logo_path = Path(__file__).resolve().parent / "company_logo.jpeg"
+
+if logo_path.is_file():
+    st.sidebar.image(
+        str(logo_path),
+        width=180
+    )
+else:
+    st.sidebar.error("Company logo not found!")
+    st.sidebar.write("Expected location:")
+    st.sidebar.write(str(logo_path))
+
+st.sidebar.divider()
+
+
+# DATABASE INITIALIZATION
 init_db()
 seed_admin()
 
 
-def main():
-
-    # User Session
-    if "user" not in st.session_state:
-        st.session_state.user = None
-
-    # Login Page
-    if not st.session_state.user:
-
-        st.title("Internship Task Tracker")
-
-        if logo_path.exists():
-            col1, col2, col3 = st.columns([1, 2, 1])
-
-            with col2:
-                st.image(str(logo_path), width=180)
-
-        login_view()
-        return
-
-    # Logged-in User
-    user = st.session_state.user
-
-    # Sidebar
-    with st.sidebar:
-
-        if logo_path.exists():
-            st.image(str(logo_path), width=160)
-
-        st.title("📌 Internship Task Tracker")
-
-        st.caption(f"Signed in as {user['name']}")
-        st.caption(user["role"].title())
-
-        # Navigation
-        if user["role"] == "admin":
-            pages = [
-                "Dashboard",
-                "Manage Interns",
-                "Manage Tasks",
-                "Publish Announcements",
-                "Reports"
-            ]
-        else:
-            pages = [
-                "My Dashboard",
-                "My Tasks",
-                "Announcements"
-            ]
-
-        page = st.radio("Navigation", pages)
-
-        st.divider()
-
-        # Logout
-        if st.button("Log out", use_container_width=True):
-            logout()
-            st.rerun()
-
-    # Admin Pages
-    if user["role"] == "admin":
-
-        if page == "Dashboard":
-            admin_dashboard_view()
-
-        elif page == "Manage Interns":
-            admin_interns_view()
-
-        elif page == "Manage Tasks":
-            admin_tasks_view()
-
-        elif page == "Publish Announcements":
-            admin_announcements_view()
-
-        elif page == "Reports":
-            reports_view()
-
-    # Intern Pages
-    else:
-
-        if page == "My Dashboard":
-            intern_dashboard_view(user["id"])
-
-        elif page == "My Tasks":
-            intern_tasks_view(user["id"])
-
-        elif page == "Announcements":
-            intern_announcements_view()
+# SESSION STATE
+if "user" not in st.session_state:
+    st.session_state.user = None
 
 
-# Run Application
-if __name__ == "__main__":
-    main()
+# LOGIN PAGE
+if st.session_state.user is None:
+    login_view()
+    st.stop()
+
+
+# CURRENT USER
+user = st.session_state.user
+role = user.get("role", "")
+
+
+# SIDEBAR USER DETAILS
+st.sidebar.subheader("Smart Internship Task Tracker")
+
+st.sidebar.write(
+    f"Welcome, {user.get('name', 'User')}"
+)
+
+st.sidebar.divider()
+
+
+# LOGOUT
+if st.sidebar.button("Logout"):
+    logout()
+    st.rerun()
+
+
+# ADMIN DASHBOARD
+if role == "admin":
+
+    menu = st.sidebar.radio(
+        "Navigation",
+        [
+            "Dashboard",
+            "Manage Interns",
+            "Manage Tasks",
+            "Reports",
+            "Announcements"
+        ]
+    )
+
+    if menu == "Dashboard":
+        admin_dashboard_view()
+
+    elif menu == "Manage Interns":
+        admin_interns_view()
+
+    elif menu == "Manage Tasks":
+        admin_tasks_view()
+
+    elif menu == "Reports":
+        reports_view()
+
+    elif menu == "Announcements":
+        admin_announcements_view()
+
+
+# INTERN DASHBOARD
+elif role == "intern":
+
+    menu = st.sidebar.radio(
+        "Navigation",
+        [
+            "Dashboard",
+            "My Tasks",
+            "Announcements"
+        ]
+    )
+
+    if menu == "Dashboard":
+        intern_dashboard_view()
+
+    elif menu == "My Tasks":
+        intern_tasks_view()
+
+    elif menu == "Announcements":
+        intern_announcements_view()
+
+
+# INVALID ROLE
+else:
+    st.error(
+        "Invalid user role. Please contact admin."
+    )
