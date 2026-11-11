@@ -1,13 +1,22 @@
-import streamlit as st
+import sys
 from pathlib import Path
 
-from database import init_db, seed_admin
-from auth import login_view, logout
-from interns import admin_interns_view
-from tasks import admin_tasks_view, intern_tasks_view
-from dashboard import admin_dashboard_view, intern_dashboard_view
-from reports import reports_view
-from announcements import (
+import streamlit as st
+
+# Add project root to Python path
+ROOT_DIR = Path(__file__).resolve().parent.parent
+
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+# Import project modules
+from src.database import init_db, seed_admin
+from src.auth import login_view, logout
+from src.interns import admin_interns_view
+from src.tasks import admin_tasks_view, intern_tasks_view
+from src.dashboard import admin_dashboard_view, intern_dashboard_view
+from src.reports import reports_view
+from src.announcements import (
     admin_announcements_view,
     intern_announcements_view
 )
@@ -19,123 +28,85 @@ st.set_page_config(
     layout="wide"
 )
 
-# DefineInfoTech Company Logo Path
-logo_path = Path(__file__).parent.parent / "assets" / "company_logo.jpeg"
+# Company Logo
+logo_path = ROOT_DIR / "assets" / "company_logo.jpeg"
+
+if logo_path.exists():
+    st.sidebar.image(str(logo_path), use_container_width=True)
 
 # Initialize Database
 init_db()
 seed_admin()
 
+# Login
+if "user" not in st.session_state:
+    st.session_state.user = None
 
-def main():
+if st.session_state.user is None:
+    login_view()
+    st.stop()
 
-    # User Session
-    if "user" not in st.session_state:
-        st.session_state.user = None
+# User Details
+user = st.session_state.user
+role = user.get("role", "")
 
-    # Login Page
-    if not st.session_state.user:
+# Sidebar
+st.sidebar.title("Smart Internship Task Tracker")
+st.sidebar.write(f"Welcome, {user.get('name', 'User')}")
 
-        if logo_path.exists():
-            col1, col2, col3 = st.columns([1, 2, 1])
+if st.sidebar.button("Logout"):
+    logout()
+    st.rerun()
 
-            with col2:
-                st.image(
-                    str(logo_path),
-                    width=180
-                )
+# Admin Dashboard
+if role == "admin":
 
-        login_view()
-        return
+    menu = st.sidebar.radio(
+        "Navigation",
+        [
+            "Dashboard",
+            "Manage Interns",
+            "Manage Tasks",
+            "Reports",
+            "Announcements"
+        ]
+    )
 
-    # Logged-in User
-    user = st.session_state.user
-
-    # Sidebar
-    with st.sidebar:
-
-        # Company Logo
-        if logo_path.exists():
-            st.image(
-                str(logo_path),
-                width=160
-            )
-
-        st.title("📌 Internship Task Tracker")
-
-        st.caption(f"Signed in as {user['name']}")
-        st.caption(user["role"].title())
-
-        # Admin Navigation
-        if user["role"] == "admin":
-
-            pages = [
-                "Dashboard",
-                "Manage Interns",
-                "Manage Tasks",
-                "Publish Announcements",
-                "Reports"
-            ]
-
-        # Intern Navigation
-        else:
-
-            pages = [
-                "My Dashboard",
-                "My Tasks",
-                "Announcements"
-            ]
-
-        page = st.radio(
-            "Navigation",
-            pages
-        )
-
-        st.divider()
-
-        # Logout Button
-        if st.button(
-            "Log out",
-            use_container_width=True
-        ):
-            logout()
-            st.rerun()
-
-    # Admin Pages
-    if page == "Dashboard":
-
+    if menu == "Dashboard":
         admin_dashboard_view()
 
-    elif page == "Manage Interns":
-
+    elif menu == "Manage Interns":
         admin_interns_view()
 
-    elif page == "Manage Tasks":
-
+    elif menu == "Manage Tasks":
         admin_tasks_view()
 
-    elif page == "Publish Announcements":
-
-        admin_announcements_view()
-
-    elif page == "Reports":
-
+    elif menu == "Reports":
         reports_view()
 
-    # Intern Pages
-    elif page == "My Dashboard":
+    elif menu == "Announcements":
+        admin_announcements_view()
 
-        intern_dashboard_view(user["id"])
+# Intern Dashboard
+elif role == "intern":
 
-    elif page == "My Tasks":
+    menu = st.sidebar.radio(
+        "Navigation",
+        [
+            "Dashboard",
+            "My Tasks",
+            "Announcements"
+        ]
+    )
 
-        intern_tasks_view(user["id"])
+    if menu == "Dashboard":
+        intern_dashboard_view()
 
-    elif page == "Announcements":
+    elif menu == "My Tasks":
+        intern_tasks_view()
 
+    elif menu == "Announcements":
         intern_announcements_view()
 
-
-# Run Application
-if __name__ == "__main__":
-    main()
+else:
+    st.error("Invalid user role. Please contact admin.")
