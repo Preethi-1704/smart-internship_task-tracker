@@ -3,7 +3,7 @@ import hashlib
 import hmac
 import os
 
-from src.database import get_connection, log_activity
+from database import get_connection, log_activity
 
 
 def hash_password(password, salt=None):
