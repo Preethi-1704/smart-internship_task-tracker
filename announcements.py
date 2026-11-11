@@ -1,6 +1,6 @@
 import streamlit as st
 import uuid
-from src.database import get_connection
+from database import get_connection
 
 
 def create_announcement_table():
