@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import date
 import hashlib
 
-from src.database import get_connection, log_activity
+from database import get_connection, log_activity
 
 STATUSES = ["To Do", "In Progress", "Testing", "Completed"]
 PRIORITIES = ["Low", "Medium", "High", "Critical"]
