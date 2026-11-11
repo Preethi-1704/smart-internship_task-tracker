@@ -1,7 +1,14 @@
 import streamlit as st
 from pathlib import Path
+import sys
 
-# Import modules
+# Root Directory
+ROOT_DIR = Path(__file__).resolve().parent.parent
+
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+# Import Modules
 from database import init_db, seed_admin
 from auth import login_view, logout
 from interns import admin_interns_view
@@ -21,7 +28,7 @@ st.set_page_config(
 )
 
 # Company Logo Path
-logo_path = Path(__file__).parent.parent / "assets" / "company_logo.jpeg"
+logo_path = ROOT_DIR / "assets" / "company_logo.jpeg"
 
 # Initialize Database
 init_db()
@@ -62,7 +69,7 @@ def main():
         st.caption(f"Signed in as {user['name']}")
         st.caption(user["role"].title())
 
-        # Admin Navigation
+        # Navigation
         if user["role"] == "admin":
             pages = [
                 "Dashboard",
@@ -71,8 +78,6 @@ def main():
                 "Publish Announcements",
                 "Reports"
             ]
-
-        # Intern Navigation
         else:
             pages = [
                 "My Dashboard",
@@ -80,10 +85,7 @@ def main():
                 "Announcements"
             ]
 
-        page = st.radio(
-            "Navigation",
-            pages
-        )
+        page = st.radio("Navigation", pages)
 
         st.divider()
 
