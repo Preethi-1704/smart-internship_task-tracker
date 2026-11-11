@@ -1,13 +1,14 @@
 import streamlit as st
 from pathlib import Path
 
-from src.database import init_db, seed_admin
-from src.auth import login_view, logout
-from src.interns import admin_interns_view
-from src.tasks import admin_tasks_view, intern_tasks_view
-from src.dashboard import admin_dashboard_view, intern_dashboard_view
-from src.reports import reports_view
-from src.announcements import (
+# Import modules
+from database import init_db, seed_admin
+from auth import login_view, logout
+from interns import admin_interns_view
+from tasks import admin_tasks_view, intern_tasks_view
+from dashboard import admin_dashboard_view, intern_dashboard_view
+from reports import reports_view
+from announcements import (
     admin_announcements_view,
     intern_announcements_view
 )
@@ -19,7 +20,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# DefineInfoTech Company Logo Path
+# Company Logo Path
 logo_path = Path(__file__).parent.parent / "assets" / "company_logo.jpeg"
 
 # Initialize Database
@@ -36,14 +37,13 @@ def main():
     # Login Page
     if not st.session_state.user:
 
+        st.title("Internship Task Tracker")
+
         if logo_path.exists():
             col1, col2, col3 = st.columns([1, 2, 1])
 
             with col2:
-                st.image(
-                    str(logo_path),
-                    width=180
-                )
+                st.image(str(logo_path), width=180)
 
         login_view()
         return
@@ -54,12 +54,8 @@ def main():
     # Sidebar
     with st.sidebar:
 
-        # Company Logo
         if logo_path.exists():
-            st.image(
-                str(logo_path),
-                width=160
-            )
+            st.image(str(logo_path), width=160)
 
         st.title("📌 Internship Task Tracker")
 
@@ -68,7 +64,6 @@ def main():
 
         # Admin Navigation
         if user["role"] == "admin":
-
             pages = [
                 "Dashboard",
                 "Manage Interns",
@@ -79,7 +74,6 @@ def main():
 
         # Intern Navigation
         else:
-
             pages = [
                 "My Dashboard",
                 "My Tasks",
@@ -93,47 +87,40 @@ def main():
 
         st.divider()
 
-        # Logout Button
-        if st.button(
-            "Log out",
-            use_container_width=True
-        ):
+        # Logout
+        if st.button("Log out", use_container_width=True):
             logout()
             st.rerun()
 
     # Admin Pages
-    if page == "Dashboard":
+    if user["role"] == "admin":
 
-        admin_dashboard_view()
+        if page == "Dashboard":
+            admin_dashboard_view()
 
-    elif page == "Manage Interns":
+        elif page == "Manage Interns":
+            admin_interns_view()
 
-        admin_interns_view()
+        elif page == "Manage Tasks":
+            admin_tasks_view()
 
-    elif page == "Manage Tasks":
+        elif page == "Publish Announcements":
+            admin_announcements_view()
 
-        admin_tasks_view()
-
-    elif page == "Publish Announcements":
-
-        admin_announcements_view()
-
-    elif page == "Reports":
-
-        reports_view()
+        elif page == "Reports":
+            reports_view()
 
     # Intern Pages
-    elif page == "My Dashboard":
+    else:
 
-        intern_dashboard_view(user["id"])
+        if page == "My Dashboard":
+            intern_dashboard_view(user["id"])
 
-    elif page == "My Tasks":
+        elif page == "My Tasks":
+            intern_tasks_view(user["id"])
 
-        intern_tasks_view(user["id"])
-
-    elif page == "Announcements":
-
-        intern_announcements_view()
+        elif page == "Announcements":
+            intern_announcements_view()
 
 
 # Run Application
