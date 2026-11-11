@@ -46,7 +46,8 @@ st.set_page_config(
 
 st.sidebar.title("DefineInfoTech Pvt. Ltd.")
 
-logo_path = ROOT_DIR / "assets" / "company_logo.jpeg"
+# Correct company logo path
+logo_path = ROOT_DIR / "src" / "company_logo.jpeg"
 
 if logo_path.is_file():
 
@@ -59,33 +60,13 @@ else:
 
     st.sidebar.error("Company logo not found!")
 
-    st.sidebar.write("Searching image files...")
+    st.sidebar.write("Logo path checked:")
 
-    image_extensions = [
-        ".png",
-        ".jpg",
-        ".jpeg",
-        ".webp"
-    ]
+    st.sidebar.code(str(logo_path))
 
-    image_files = [
-        file
-        for file in ROOT_DIR.rglob("*")
-        if file.is_file()
-        and file.suffix.lower() in image_extensions
-    ]
-
-    if image_files:
-
-        st.sidebar.write("Images found in repository:")
-
-        for file in image_files:
-            st.sidebar.write(
-                str(file.relative_to(ROOT_DIR))
-            )
-
-    else:
-        st.sidebar.warning("No image files found.")
+    st.sidebar.warning(
+        "Please check company_logo.jpeg location."
+    )
 
 
 st.sidebar.divider()
