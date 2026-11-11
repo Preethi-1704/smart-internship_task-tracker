@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
-from src.database import get_connection
+from database import get_connection
 
 def reports_view():
     st.title("📈 Reports & Weekly Performance")
