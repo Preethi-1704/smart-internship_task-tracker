@@ -2,7 +2,7 @@ import sqlite3
 from pathlib import Path
 from contextlib import contextmanager
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
 DATA_DIR.mkdir(exist_ok=True)
 DB_PATH = DATA_DIR / "internship_tracker.db"
