@@ -2,12 +2,12 @@ import streamlit as st
 from pathlib import Path
 
 from database import init_db, seed_admin
-from src.auth import login_view, logout
-from src.interns import admin_interns_view
-from src.tasks import admin_tasks_view, intern_tasks_view
-from src.dashboard import admin_dashboard_view, intern_dashboard_view
-from src.reports import reports_view
-from src.announcements import (
+from auth import login_view, logout
+from interns import admin_interns_view
+from tasks import admin_tasks_view, intern_tasks_view
+from dashboard import admin_dashboard_view, intern_dashboard_view
+from reports import reports_view
+from announcements import (
     admin_announcements_view,
     intern_announcements_view
 )
