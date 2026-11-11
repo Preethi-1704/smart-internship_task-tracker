@@ -1,5 +1,5 @@
 import streamlit as st
-from src.database import get_connection
+from database import get_connection
 
 
 def admin_dashboard_view():
