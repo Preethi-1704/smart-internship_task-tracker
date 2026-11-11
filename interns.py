@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from src.database import get_connection, log_activity
+from database import get_connection, log_activity
 
 def admin_interns_view():
     st.title("👥 Intern Management")
@@ -13,7 +13,7 @@ def admin_interns_view():
             save = st.form_submit_button("Add intern")
         if save:
             try:
-                from src.auth import create_user
+                from auth import create_user
                 create_user(name, username, password, "intern", skills)
                 st.success("Intern account created.")
                 st.rerun()
