@@ -3,13 +3,13 @@ from pathlib import Path
 
 import streamlit as st
 
-# Add project root to Python path
+# Project root path
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-# Import project modules
+# Import modules
 from src.database import init_db, seed_admin
 from src.auth import login_view, logout
 from src.interns import admin_interns_view
@@ -23,42 +23,56 @@ from src.announcements import (
 
 # Page Configuration
 st.set_page_config(
-    page_title="Internship Task Tracker",
+    page_title="Smart Internship Task Tracker",
     page_icon="📌",
     layout="wide"
 )
 
 # Company Logo
+st.sidebar.title("DefineInfoTech")
+
 logo_path = ROOT_DIR / "assets" / "company_logo.jpeg"
 
 if logo_path.exists():
-    st.sidebar.image(str(logo_path), use_container_width=True)
+    st.sidebar.image(
+        str(logo_path),
+        width=180
+    )
+else:
+    st.sidebar.error("Company logo not found!")
+    st.sidebar.caption(f"Expected path: {logo_path}")
+
+st.sidebar.divider()
 
 # Initialize Database
 init_db()
 seed_admin()
 
-# Login
+# Session State
 if "user" not in st.session_state:
     st.session_state.user = None
 
+# Login Page
 if st.session_state.user is None:
     login_view()
     st.stop()
 
-# User Details
+# Current User
 user = st.session_state.user
 role = user.get("role", "")
 
-# Sidebar
+# Sidebar User Details
 st.sidebar.title("Smart Internship Task Tracker")
-st.sidebar.write(f"Welcome, {user.get('name', 'User')}")
+st.sidebar.write(
+    f"Welcome, {user.get('name', 'User')}"
+)
 
+# Logout
 if st.sidebar.button("Logout"):
     logout()
     st.rerun()
 
-# Admin Dashboard
+# Admin Menu
 if role == "admin":
 
     menu = st.sidebar.radio(
@@ -87,7 +101,7 @@ if role == "admin":
     elif menu == "Announcements":
         admin_announcements_view()
 
-# Intern Dashboard
+# Intern Menu
 elif role == "intern":
 
     menu = st.sidebar.radio(
