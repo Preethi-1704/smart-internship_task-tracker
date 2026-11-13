@@ -1,4 +1,5 @@
 
+
 import sys
 from pathlib import Path
 
@@ -20,7 +21,6 @@ from src.announcements import (
     intern_announcements_view
 )
 
-
 st.set_page_config(
     page_title="Smart Internship Task Tracker",
     page_icon="📌",
@@ -39,7 +39,7 @@ else:
 
 st.sidebar.divider()
 
-# Database
+# Database Initialization
 init_db()
 seed_admin()
 
@@ -47,7 +47,7 @@ seed_admin()
 if "user" not in st.session_state:
     st.session_state.user = None
 
-# Login
+# Login Page
 if st.session_state.user is None:
     login_view()
     st.stop()
@@ -56,10 +56,10 @@ if st.session_state.user is None:
 user = st.session_state.user
 role = user.get("role", "")
 
-# Get User ID
+# User ID
 user_id = user.get("id") or user.get("user_id")
 
-# Sidebar
+# Sidebar Details
 st.sidebar.subheader("Smart Internship Task Tracker")
 st.sidebar.write(f"Welcome, {user.get('name', 'User')}")
 st.sidebar.divider()
@@ -69,7 +69,7 @@ if st.sidebar.button("Logout"):
     logout()
     st.rerun()
 
-# Admin
+# ADMIN SECTION
 if role == "admin":
 
     menu = st.sidebar.radio(
@@ -98,7 +98,7 @@ if role == "admin":
     elif menu == "Announcements":
         admin_announcements_view()
 
-# Intern
+# INTERN SECTION
 elif role == "intern":
 
     menu = st.sidebar.radio(
@@ -117,11 +117,11 @@ elif role == "intern":
         intern_dashboard_view(user_id)
 
     elif menu == "My Tasks":
-        intern_tasks_view()
+        intern_tasks_view(user_id)
 
     elif menu == "Announcements":
         intern_announcements_view()
 
+# INVALID ROLE
 else:
     st.error("Invalid user role. Please contact admin.")
-
