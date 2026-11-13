@@ -1,3 +1,4 @@
+
 import streamlit as st
 from src.database import get_connection
 
@@ -33,7 +34,12 @@ def intern_dashboard_view(user_id):
     st.title("My Dashboard")
     st.subheader("My Progress")
 
+    if user_id is None:
+        st.error("User ID not found. Please login again.")
+        return
+
     with get_connection() as con:
+
         total = con.execute(
             "SELECT COUNT(*) FROM tasks WHERE assignee_id=?",
             (user_id,)
@@ -51,15 +57,15 @@ def intern_dashboard_view(user_id):
             (user_id,)
         ).fetchone()[0]
 
-        incomplete = total - completed
-
         rows = con.execute(
             """SELECT title, status, priority, due_date
-            FROM tasks WHERE assignee_id=?
+            FROM tasks
+            WHERE assignee_id=?
             ORDER BY id DESC""",
             (user_id,)
         ).fetchall()
 
+    incomplete = total - completed
     percentage = (completed / total * 100) if total else 0
 
     c1, c2, c3 = st.columns(3)
